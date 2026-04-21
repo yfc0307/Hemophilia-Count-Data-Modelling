@@ -40,9 +40,19 @@ if (zero_indices == 378) {
 
 # Step 5: Spearman Correlation Matrix
 cor_matrix <- cor.mtest(data, conf.level = .95)
-par(family="serif")
-par(cex = 1.5)
-par(mar = c(0, 0, 3.5, 0))
+par(mfrow = c(1, 2), family = "serif", cex = 1.2, mar = c(0, 0, 0, 0))
+
+corrplot(
+  cor(data),
+  method = "color",
+  type = "upper",
+  tl.cex = 0.7,
+  tl.col = "black",
+  tl.srt = 45,
+  addCoef.col = "black",
+  number.cex = 0.8,
+  mar = c(0, 1, 0, 0)
+)
 corrplot(
   cor(data),
   method = "color",
@@ -53,12 +63,14 @@ corrplot(
   p.mat = cor_matrix$p,
   insig = "label_sig",
   sig.level = c(.001, .01, .05),
-  pch.cex = 0.8,
+  pch.cex = 0.9,
   pch.col = "red",
-  addCoef.col = "black",
-  mar = c(0, 0, 2, 0)
+  addCoef.col = NA,
+  number.cex = 0.01,
+  mar = c(0, 1, 0, 0)
 )
-title("Spearman Correlation Heatmap", line = 2)
+
+par(mfrow = c(1, 1))
 
 
 # Step 6: Convert hiv and factor to categorical
@@ -117,7 +129,7 @@ model_zicmp_full <- glm.cmp(
     optim.method = "BFGS",
     hybrid.tol = 1e-6,
     truncate.tol = 1e-6,
-    ymax = 500
+    ymax = 200
   )
 )
 model_zicmp_1 <- glm.cmp(
@@ -129,7 +141,7 @@ model_zicmp_1 <- glm.cmp(
     optim.method = "BFGS",
     hybrid.tol = 1e-6,
     truncate.tol = 1e-6,
-    ymax = 500
+    ymax = 200
   )
 )
 
@@ -246,3 +258,16 @@ table(data$hiv)
 table(data$factor)
 table(data$age)
 table(data$py)
+
+# Pearson Statistics
+pearson_residuals <- residuals(model_poisson_full, type = "pearson")
+pearson_statistic <- sum(pearson_residuals^2)
+n <- nobs(model_poisson_full)
+k <- length(coef(model_poisson_full))
+df <- n - k
+ratio <- pearson_statistic / df
+cat("Pearson statistic:", round(pearson_statistic, 2), "\n")
+cat("df:", df, "\n")
+cat("n (observations):", n, "\n")
+cat("k (parameters):", k, "\n")
+cat("P / (n - k):", round(ratio, 3), "\n")
