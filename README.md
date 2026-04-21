@@ -1,4 +1,4 @@
-# Statistical Modelling of Count Data with Excessive Zeros and Overdispersion/Underdispersion
+# Statistical Modelling of Count Data with Excessive Zeros and Overdispersion
 
 Hong Kong Metropolitan University School of Science and Technology
 
