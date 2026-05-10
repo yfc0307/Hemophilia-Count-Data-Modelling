@@ -211,8 +211,8 @@
         \]
       </div>
       <p>
-        where dependent variable Y given independent variables X_1,X_2,\ \cdots,\ X_p follows Poisson distribution with 
-        mean \mu. Because the logarithm of the conditional mean is linear in the parameters, this model is also called 
+        where dependent variable Y given independent variables \(X_1,X_2,\cdots,X_p\) follows Poisson distribution with 
+        mean \(\mu\). Because the logarithm of the conditional mean is linear in the parameters, this model is also called 
         a log-linear model. The probability mass function (pmf) of the Poisson distribution can be given by
       </p>
       <div class="equation">
@@ -221,7 +221,7 @@
         \]
       </div>
       <p>
-        where P\left(Y=y\right) refers to the probability of the outcome variable Y equals to y the number of event 
+        where \(P\left(Y=y\right)\) refers to the probability of the outcome variable Y equals to y the number of event 
         occurrence. An important assumption of P is that \(E(Y)=Var(Y)=\mu\). This assumption is often violated by 
         real-life data characteristics.
       </p>
@@ -233,8 +233,8 @@
         the linear model to handle many special cases such as logit and probit models for quantal responses, or 
         log-linear models for count. By beginning with the standard Gaussian linear regression, as shown in equation 1, 
         the form of GLM remained basically similar to the form MLR, with some specification to the random component Y. 
-        Assume the random component Y have independent Normal distributions with \mathrm{E}\left(Y\right)=\mu and constant 
-        variance \sigma^2, the systematic component, where covariates X_1,\ X_2,\ \cdots,\ X_p produce a linear predictor 
+        Assume the random component Y have independent Normal distributions with \(\mathrm{E}\left(Y\right)=\mu\) and constant 
+        variance \(\sigma^2\), the systematic component, where covariates \(X_1,X_2,\cdots,X_p\) produce a linear predictor 
         \eta so that
       </p>
       <div class="equation">
@@ -244,11 +244,11 @@
       </div>
       <p>
         where the link between the random component and systematic component is \mu=\eta. It is therefore can be written 
-        as \eta_i=g\left(\mu_i\right) where g\left(\bullet\right) is called the link function. This allows the systematic 
+        as \(\eta_i=g\left(\mu_i\right)\) where \(g\left(\bullet\right)\) is called the link function. This allows the systematic 
         component to come from a non-Gaussian distribution such as Poisson distribution. In modelling count that the 
         distribution is Poisson, since counts based on independence in cross-classified data lead naturally to multiplicative 
-        effects (McCullagh, 1989), it can be expressed in GLM by the log link, where \eta=\ln{\mu} or can be also written as 
-        its inverse \mu=e^\eta. Therefore, the general model form of GLM with a log link function is
+        effects (McCullagh, 1989), it can be expressed in GLM by the log link, where \(\eta=\ln{\mu}\) or can be also written as 
+        its inverse \(\mu=e^\eta\). Therefore, the general model form of GLM with a log link function is
       </p>
       <div class="equation">
         \[
@@ -266,7 +266,7 @@
       <p>
         The model form for NB is identical to equation 5 because it also belongs to the log-linear model family, the difference 
         is that Y is assumed to follow negative binomial distribution. Negative binomial distribution is based on Poisson 
-        distribution but allowing variance to be greater than the mean by adding a heterogeneity parameter k to its pmf. The 
+        distribution but allowing variance to be greater than the mean by adding a heterogeneity parameter \(k\) to its pmf. The 
         pmf of negative binomial distribution can be given by
       </p>
       <div class="equation">
@@ -276,7 +276,7 @@
         \]
       </div>
       <p>
-        where \Gamma\left(a\right)=\int_{0}^{\infty}{e^{-t}t^{a-1}dt}. With larger k, the distribution leans closer to Poisson 
+        where \(\Gamma\left(a\right)=\int_{0}^{\infty}{e^{-t}t^{a-1}dt}\). With larger \(k\), the distribution leans closer to Poisson 
         distribution. The relationship between the mean \mu and the variance can be given by
       </p>
       <div class="equation">
@@ -285,7 +285,7 @@
         \]
       </div>
       <p>
-        where \mu^2/k determines the extra variance in the distribution that Poisson distribution failed to handle. Figure 1 
+        where \(\mu^2/k\) determines the extra variance in the distribution that Poisson distribution failed to handle. Figure 1 
         displays overdispersion using a simulated distribution using negative binomial distribution. Therefore, NB serves as 
         an alternative of Poisson for handling overdispersion, the additional parameter k in its pmf shown in equation 6 allows 
         a more flexible variance-mean relationship, therefore it can capture overdispersed Poisson distribution. However, NB is 
@@ -334,9 +334,9 @@
         \]
       </div>
       <p>
-        where f_2(y) is the base count density, \pi represents the probability of whether a zero is “structural zero” or “sampling zero”, 
+        where \(f_2(y)\) is the base count density, \(\pi\) represents the probability of whether a zero is “structural zero” or “sampling zero”, 
         which the former means the zeros cannot be captured by the distribution and are inflated, the latter means the zeros belongs to 
-        the base distribution. By defining a binary censoring indicator d_i for the zero-inflated models 
+        the base distribution. By defining a binary censoring indicator \(d_i\) for the zero-inflated models 
       </p>
       <div class="equation">
         \[
