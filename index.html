@@ -43,6 +43,7 @@
 
       <p class="mt-4"><strong>Supervisor:</strong> Dr. Chan Moon Tong Tony</p>
       <p>April 2026</p>
+      <a href="https://github.com/yfc0307/Hemophilia-Count-Data-Modelling">Github</a>
     </header>
 
     <section class="card-section">
@@ -210,63 +211,119 @@
         \]
       </div>
       <p>
-        where dependent variable Y given independent variables X_1,X_2,\ \cdots,\ X_p follows Poisson distribution with mean \mu. Because the logarithm of the conditional mean is linear in the parameters, this model is also called a log-linear model. The probability mass function (pmf) of the Poisson distribution can be given by</p>
+        where dependent variable Y given independent variables X_1,X_2,\ \cdots,\ X_p follows Poisson distribution with 
+        mean \mu. Because the logarithm of the conditional mean is linear in the parameters, this model is also called 
+        a log-linear model. The probability mass function (pmf) of the Poisson distribution can be given by
+      </p>
       <div class="equation">
         \[
         P(Y=y)=\frac{\mu^y e^{-\mu}}{y!}, \quad y=0,1,2,\cdots \tag{3}
         \]
       </div>
       <p>
-        where P\left(Y=y\right) refers to the probability of the outcome variable Y equals to y the number of event occurrence. An important assumption of P is that \(E(Y)=Var(Y)=\mu\). This assumption is often violated by real-life data
-        characteristics.
+        where P\left(Y=y\right) refers to the probability of the outcome variable Y equals to y the number of event 
+        occurrence. An important assumption of P is that \(E(Y)=Var(Y)=\mu\). This assumption is often violated by 
+        real-life data characteristics.
       </p>
 
       <h4>2.3.3 Generalized Linear Models</h4>
+      <p>
+        Generalized linear models (GLM) are first proposed by Nelder and Wedderburn in 1972, then formalized by 
+        McCullagh in 1989. McCullagh (1989) introduced GLM as a generalization of classical linear models that allows 
+        the linear model to handle many special cases such as logit and probit models for quantal responses, or 
+        log-linear models for count. By beginning with the standard Gaussian linear regression, as shown in equation 1, 
+        the form of GLM remained basically similar to the form MLR, with some specification to the random component Y. 
+        Assume the random component Y have independent Normal distributions with \mathrm{E}\left(Y\right)=\mu and constant 
+        variance \sigma^2, the systematic component, where covariates X_1,\ X_2,\ \cdots,\ X_p produce a linear predictor 
+        \eta so that
+      </p>
       <div class="equation">
         \[
         \eta=\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p \tag{4}
         \]
       </div>
+      <p>
+        where the link between the random component and systematic component is \mu=\eta. It is therefore can be written 
+        as \eta_i=g\left(\mu_i\right) where g\left(\bullet\right) is called the link function. This allows the systematic 
+        component to come from a non-Gaussian distribution such as Poisson distribution. In modelling count that the 
+        distribution is Poisson, since counts based on independence in cross-classified data lead naturally to multiplicative 
+        effects (McCullagh, 1989), it can be expressed in GLM by the log link, where \eta=\ln{\mu} or can be also written as 
+        its inverse \mu=e^\eta. Therefore, the general model form of GLM with a log link function is
+      </p>
       <div class="equation">
         \[
         \ln(\mu)=\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p \tag{5}
         \]
       </div>
       <p>
-        In this project, all models including P, NB, CMP, and their zero-inflated models are applied through the form
-        of GLM with a log link function.
+        It is worth noting that this model form is identical to the inverse of equation 2, which means it is functionally 
+        identical to P. The robustness of the GLM leads to its frequent appearance in statistical software such as R and SAS. 
+        In this project, all models including P, NB, CMP, and their zero-inflated models will be applied through the form of 
+        GLM with a log link function.
       </p>
 
       <h4>2.3.4 Negative Binomial Regression Models</h4>
+      <p>
+        The model form for NB is identical to equation 5 because it also belongs to the log-linear model family, the difference 
+        is that Y is assumed to follow negative binomial distribution. Negative binomial distribution is based on Poisson 
+        distribution but allowing variance to be greater than the mean by adding a heterogeneity parameter k to its pmf. The 
+        pmf of negative binomial distribution can be given by
+      </p>
       <div class="equation">
         \[
         P(Y=y)=\frac{\Gamma(y+k)}{\Gamma(k)y!}\left(\frac{k}{\mu+k}\right)^k\left(\frac{\mu}{\mu+k}\right)^y,
         \quad y=0,1,2,\cdots \tag{6}
         \]
       </div>
+      <p>
+        where \Gamma\left(a\right)=\int_{0}^{\infty}{e^{-t}t^{a-1}dt}. With larger k, the distribution leans closer to Poisson 
+        distribution. The relationship between the mean \mu and the variance can be given by
+      </p>
       <div class="equation">
         \[
         Var(Y)=\mu+\frac{\mu^2}{k} \tag{7}
         \]
       </div>
+      <p>
+        where \mu^2/k determines the extra variance in the distribution that Poisson distribution failed to handle. Figure 1 
+        displays overdispersion using a simulated distribution using negative binomial distribution. Therefore, NB serves as 
+        an alternative of Poisson for handling overdispersion, the additional parameter k in its pmf shown in equation 6 allows 
+        a more flexible variance-mean relationship, therefore it can capture overdispersed Poisson distribution. However, NB is 
+        unable to handle underdispersion, which leaves room for improvement. Still NB has become one of the most popular approaches 
+        in modelling real-life count data because underdispersion was rare to be seen in real-life count Data.
+      </p>
 
       <h4>2.3.5 Conway-Maxwell Poisson Regression Models</h4>
+      <p>
+        The model form for CMP is identical to equation 5 as it also belongs to log-linear model family. The difference between 
+        CMP and other log-linear models lies on the pmf. The pmf of CMP can be given by
+      </p>
       <div class="equation">
         \[
         P(Y=y)=\frac{\lambda^y}{(y!)^\nu Z(\lambda,\nu)}, \quad y=0,1,2,\cdots \tag{8}
         \]
       </div>
+      <p>
+        where \(\lambda\) is the rate parameter under the Poisson model and 
+        \(\lambda=E\left(Y^\nu\right)\), \(\nu\) is the dispersion parameter 
+        where \(\nu \geq 0\), for \(\nu = 1\) it denotes equidispersion, 
+        \(\nu > 1\) denotes underdispersion, and \(\nu < 1\) denotes 
+        overdispersion. \(Z\left(\lambda,\nu\right)\) is a normalizing 
+        constant that is given by
+      </p>
       <div class="equation">
         \[
         Z(\lambda,\nu)=\sum_{y=0}^{\infty}\frac{\lambda^y}{(y!)^\nu} \tag{9}
         \]
       </div>
-      <p>
-        where \(\nu\) is the dispersion parameter, with \(\nu=1\) denoting equidispersion,
-        \(\nu>1\) underdispersion, and \(\nu<1\) overdispersion.
-      </p>
 
       <h4>2.3.6 Zero-inflated Models</h4>
+      <p>
+        Lambert (1992) studied the number of defects per area in a manufacturing process using data from a soldering experiment 
+        at AT&amp;T Bell Laboratories. In the data, a high proportion of soldered areas had no detects, leading Lambert to introduce 
+        a generalized Poisson regression model to handle excess zeros, that is zero-inflated Poisson regression model (ZIP).
+        The zero-inflated model specifies
+      </p>
       <div class="equation">
         \[
         \mathrm{Pr}[Y=y]=
@@ -276,7 +333,11 @@
         \end{cases} \tag{10}
         \]
       </div>
-
+      <p>
+        where f_2(y) is the base count density, \pi represents the probability of whether a zero is “structural zero” or “sampling zero”, 
+        which the former means the zeros cannot be captured by the distribution and are inflated, the latter means the zeros belongs to 
+        the base distribution. By defining a binary censoring indicator d_i for the zero-inflated models 
+      </p>
       <div class="equation">
         \[
         d_i=
@@ -287,74 +348,182 @@
         \]
       </div>
 
-      <div class="equation">
-        \[
-        \mathrm{Pr}[Y=y]=
-        \begin{cases}
-        \pi+(1-\pi)e^{-\lambda}, & \text{if } y=0 \\
-        (1-\pi)\frac{\lambda^ye^{-\lambda}}{y!}, & \text{if } y>0
-        \end{cases} \tag{12}
-        \]
-      </div>
-
       <h3>2.4 Model Evaluation and Selection Techniques</h3>
 
       <h4>2.4.1 Pearson Residual and Deviance</h4>
+      <p>
+        Residuals measure the distance between fitted values and actual values of the dependent variables
+        (Cameron &amp; Trivedi, 2013). The Pearson residual \(p_i\) can be written as:
+      </p>
       <div class="equation">
         \[
         p_i=\frac{(y_i-\hat{\mu}_i)}{\sqrt{\hat{\omega}_i}} \tag{13}
         \]
       </div>
+      <p>
+        where \(\hat{\omega}_i\) is an estimate of variance \(\omega_i\) of \(y_i\). The sum of squares of
+        \(p_i\) gives the Pearson statistic \(P\). Therefore, Pearson statistic can be given by:
+      </p>
       <div class="equation">
         \[
         P=\sum_{i=1}^{n}\frac{(y_i-\hat{\mu}_i)^2}{\sqrt{\hat{\omega}_i}} \tag{14}
         \]
       </div>
+      <p>
+        It is the standard measure of goodness-of-fit for any model of \(y_i\) with mean \(\mu_i\) and
+        variance \(\omega_i\). In practice, \(P\) is compared with \((n-k)\), where \(n\) is the number
+        of observations and \(k\) is the number of parameters in the model, giving the degree-of-freedom.
+        In GLM literature it is standard to interpret \(P &gt; (n-k)\) as evidence of overdispersion.
+        However, this interpretation assumes a correct specification for \(\mu_i\), or the model form.
+        Therefore \(P &gt; (n-k)\) could also indicate misspecification of the model form. Workie and Azene
+        (2021) used Pearson residual to test for overdispersion in the data, where in their case the
+        value of Pearson statistic divided by degree-of-freedom was higher than 1, which represented
+        overdispersion.
+      </p>
+      <p>
+        The deviance residual, or deviance, defined by Cameron and Trivedi (2013), is given by:
+      </p>
       <div class="equation">
         \[
         D(\mathbf{y},\hat{\boldsymbol{\mu}})=2\left\{\mathcal{L}(\mathbf{y})-\mathcal{L}(\hat{\boldsymbol{\mu}})\right\} \tag{15}
         \]
       </div>
+      <p>
+        where \(\hat{\boldsymbol{\mu}}\) and \(\mathbf{y}\) are the \(n\times1\) vectors with \(i^{th}\)
+        entries \(\mu_i\) and \(y_i\), respectively. This can be explained as the difference between the
+        maximum log-likelihood achievable and the log-likelihood of the fitted model. It is another
+        measure of goodness-of-fit but restricted to GLM. About the method of obtaining the log-likelihood,
+        see section 2.4.2.
+      </p>
 
       <h4>2.4.2 Maximum Log-likelihood</h4>
+      <p>
+        Likelihood provides a direct measure for the model’s goodness-of-fit to the data and can be given by
+        \(L(\boldsymbol{\beta};\mathbf{y})=\prod_{i=1}^{n}f(y_i\mid\boldsymbol{\beta})\), where
+        \(f(y_i\mid\boldsymbol{\beta})\) is the base density for observation \(y_i\) evaluated at parameters
+        \(\boldsymbol{\beta}\). For example, the likelihood function for the Poisson model can be written as:
+      </p>
       <div class="equation">
         \[
         L(\lambda)=\prod_{i=1}^{n}\frac{\lambda^{y_i}e^{-\lambda}}{y_i!} \tag{16}
         \]
       </div>
+      <p>
+        where \(n\) refers to the number of counts. It is worth noting that the likelihood function is simply
+        a multiplication of probabilities for each \(y_i\), where the probability can be calculated by the
+        pmf of Poisson given in equation 3. Likelihood evaluates the model’s fitness to a given dataset,
+        while probability predicts the chance of an event given a fixed probability distribution. However,
+        in actual practice, log-likelihood is more often used compared to likelihood. The log-likelihood
+        function for Poisson can be written as:
+      </p>
       <div class="equation">
         \[
         \ell(\lambda)=\sum_{i=1}^{n}\ln\left(\frac{\lambda^{y_i}e^{-\lambda}}{y_i!}\right) \tag{17}
         \]
       </div>
+      <p>
+        Since multiplication of probabilities with many samples may result in extremely small likelihood
+        values, applying logarithms allows the function to become a summation and produces a more stable
+        value, making it more intuitive to understand.
+      </p>
+      <p>
+        Cameron and Trivedi (2013) also stated that only in the case in which the limit of \(\ell/n\) is
+        maximized would be considered, that the maximum likelihood estimate (MLE) \(\hat{\theta}_{ML}\)
+        is the solution to the first-order conditions:
+      </p>
       <div class="equation">
         \[
         \frac{\partial \ell}{\partial \boldsymbol{\theta}}=
         \sum_{i=1}^{n}\frac{\partial \ln(f_i)}{\partial \boldsymbol{\theta}}=0 \tag{18}
         \]
       </div>
+      <p>
+        where \(f_i=f(y_i\mid\mathbf{x}_i,\boldsymbol{\theta})\) is the conditional pmf of the observed
+        count \(y_i\), given predictor vector \(\mathbf{x}_i\) and parameter vector \(\boldsymbol{\theta}\),
+        and \(\partial \ell/\partial \boldsymbol{\theta}\) is a \(q\times1\) vector where \(q\) is the
+        number of model parameters.
+      </p>
+      <p>
+        After obtaining the MLE of parameters \(\hat{\theta}_{ML}\), the standard errors of the model can
+        be obtained. For example, for the Poisson MLE \(\hat{\boldsymbol{\beta}}\):
+      </p>
       <div class="equation">
         \[
         Var(\hat{\boldsymbol{\beta}})=\left(\sum_{i=1}^{n}\mu_i\mathbf{X}_i\mathbf{X}_i^\prime\right)^{-1} \tag{19}
         \]
       </div>
+      <p>
+        where the variance matrix of \(\hat{\boldsymbol{\beta}}\) is obtained from the Fisher information
+        matrix \(\mathbf{X}_i\mathbf{X}_i^\prime\), that is the product of vector of predictors
+        \(\mathbf{X}_i\) with dimension \(p\times1\) and its transpose with dimension \(1\times p\).
+        The maximum likelihood estimate standard errors (MLSE) for Poisson can be obtained by the square
+        root of the variance, that is \(SE(\hat{\boldsymbol{\beta}})=\sqrt{Var(\hat{\boldsymbol{\beta}})}\).
+      </p>
+      <p>
+        After obtaining the MLSE for the model, Wald test can be conducted to determine the statistical
+        significance of each model parameter. The z-value can be obtained by:
+      </p>
       <div class="equation">
         \[
         z=\frac{\hat{\boldsymbol{\beta}}}{SE(\hat{\boldsymbol{\beta}})} \tag{20}
         \]
       </div>
+      <p>
+        Then the p-value can be obtained by
+        \(p\text{-value}=2\times[1-\Phi(|z|)]\), where \(\Phi(|z|)\) is the standard normal cumulative
+        distribution function (CDF) that calculates the probability of being less than the absolute
+        z-value in a standard normal distribution. We may compare the p-value to a given \(\alpha\)
+        value such as 0.05. If the p-value is smaller than \(\alpha=0.05\), we conclude that the
+        coefficient is statistically significant at 5% level. For a model coefficient that is insignificant,
+        we may consider reducing that coefficient from the full model. However, statistical insignificance
+        does not mean the variable has no effect on the outcome variable.
+      </p>
+      <p>
+        The main weakness of using likelihood as the sole measure for model performance comes from ignoring
+        model complexity (Cameron &amp; Trivedi, 2013). Since adding more model parameters almost always
+        increases the goodness-of-fit, it can lead to overfitting and failure to generalize the data pattern.
+        To account for this weakness, information criteria like AIC and BIC add penalties based on the
+        number of parameters in the model or the sample size of the data.
+      </p>
 
       <h4>2.4.3 Information Criteria</h4>
+      <p>
+        One of the most used information criteria is the Akaike Information Criterion (AIC). It was first
+        proposed by Akaike (1974). The AIC can be calculated by:
+      </p>
       <div class="equation">
         \[
         AIC=-2\ell+2k \tag{21}
         \]
       </div>
+      <p>
+        where \(\ell\) is the log-likelihood and \(k\) is the number of adjustable parameters in the model.
+        By adding \(k\) into consideration, AIC provides a robust measure for model performance while
+        balancing fairness for simpler models.
+      </p>
+      <p>
+        An alternative criterion is the Bayesian Information Criterion (BIC). It was first proposed by
+        Schwarz (1978) as a large-sample approximation to the Bayes factor. The BIC can be calculated by:
+      </p>
       <div class="equation">
         \[
         BIC=-2\ell+\ln(N)k \tag{22}
         \]
       </div>
+      <p>
+        where \(N\) is the sample size. The BIC extends its perspective onto the sample size of the data,
+        which further encourages simple models on large sample size data, assuming the larger sample size
+        provides more advantage to complex models. Therefore, it is worth noting that BIC almost always
+        imposes heavier penalty on complex models as \(\ln(N)&gt;2\) if \(N&gt;8\), and in real-life data
+        the sample size is almost always larger than 8.
+      </p>
+      <p>
+        Kuha (2004) and Aho (2014) studied the differences between AIC and BIC but did not give a clear
+        preference toward either of them. Kuha (2004) mentioned that the two most iconic penalized model
+        selection criteria are AIC and BIC, although many other criteria exist and most of them are
+        modifications or generalizations of AIC and BIC. In practice, both criteria can be used to provide
+        a two-perspective way of evaluating the model: by goodness-of-fit and by simplicity.
+      </p>
     </section>
 
     <section id="methodology" class="card-section">
