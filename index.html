@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistical Modelling of Count Data with Excessive Zeros and Overdispersion</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$','$']],
+        displayMath: [['\\[', '\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+  <div class="container py-4">
+    <header class="hero text-center">
+      <p class="institution mb-1">Hong Kong Metropolitan University</p>
+      <p class="institution mb-1">School of Science and Technology</p>
+      <p class="institution">BSc (Hon) in Data Science and Artificial Intelligence</p>
+
+      <p class="report-type mt-4 mb-1">COMP S461F Data Science Final Project Report</p>
+      <p class="text-muted">2025-26 · Group 1</p>
+
+      <h1 class="mt-4">Statistical Modelling of Count Data with Excessive Zeros and Overdispersion</h1>
+
+      <div class="authors mt-4">
+        <p>Chen Yufan</p>
+        <p>Chan Chun Yan</p>
+        <p>Lam Ching</p>
+        <p>Liu Tsz Ching</p>
+        <p>Tai Lap Tak</p>
+      </div>
+
+      <p class="mt-4"><strong>Supervisor:</strong> Dr. Chan Moon Tong Tony</p>
+      <p>April 2026</p>
+    </header>
+
+    <section class="card-section">
+      <h2>Abstract</h2>
+      <p>
+        In count data modelling, excessive zeros and overdispersion appear frequently in real-life data,
+        which significantly affected the goodness-of-fit of standard Poisson regression models (P).
+        To address these two issues, regression models with different specifications of P were derived,
+        such as negative binomial regression models (NB), zero-inflated regression models, and
+        Conway-Maxwell Poisson regression models (CMP). NB and CMP introduced additional dispersion
+        parameters relative to overdispersion, while zero-inflated regression models introduced additional
+        component addressing the probability of excessive zeros. The performance of these models is
+        illustrated in an application on a count data from a study on hemophilia patients with characteristic
+        of overdispersion and excess zeros. The result shows that zero-inflated Poisson regression models
+        (ZIP) and zero-inflated negative binomial regression models (ZINB) are the best model in handling
+        overdispersion and zero-inflation, while the more complex and flexible zero-inflated Conway-Maxwell
+        Poisson regression model (ZICMP) underperformed.
+      </p>
+    </section>
+
+    <section class="card-section">
+      <h2>Table of Content</h2>
+      <ol class="toc">
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#literature-review">Literature Review</a></li>
+        <li><a href="#methodology">Methodology</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#discussion">Discussion and Conclusion</a></li>
+        <li><a href="#acknowledgements">Acknowledgements</a></li>
+        <li><a href="#references">References</a></li>
+        <li><a href="#appendices">Appendices</a></li>
+      </ol>
+    </section>
+
+    <section id="introduction" class="card-section">
+      <h2>1. Introduction</h2>
+
+      <h3>1.1 Project Background</h3>
+      <p>
+        Many medical studies involve real-life data that has outcome variables in form of zero-inflated
+        and overdispersed counts, such as number of deaths or number of patients in a particular period
+        of time (Lee et al., 2023). These data are always positive integers and often have a small mean
+        value and a heavily right-skewed distribution that does not follow normal distribution. Failure
+        to select suitable models for analyzing this kind of data can lead to incorrect results and misleading
+        findings that ultimately provide bad suggestions to the healthcare system in ways of patient management
+        and treatment strategies.
+      </p>
+      <p>
+        Therefore, it is important to know which models are the best for data with count outcomes before
+        analyzing. In this research project, we studied on a dataset collected from a study on hemophilia
+        death factors, that has the count of death as the outcome variable, and various potential factors
+        as the dependent variables such as whether the patient has been diagnosed with HIV, the blood
+        clotting level of the patient, and the age of the patient. According to Berry et al. (1992) and
+        the World Health Organization, hemophilia is a rare bleeding disorder where the blood does not clot
+        properly due to a deficiency in specific clotting proteins that leads to prolonged bleeding after
+        injuries, surgery, or spontaneous bleeding into joints and muscles, which can cause chronic pain
+        and joint damage.
+      </p>
+      <p>
+        The harmfulness of hemophilia motivates us into finding the best model for our data that can provide
+        concrete discoveries about the causes of death for hemophilia patients, and to also provide a reliable
+        data modelling method for future researchers studying in related fields. To analyze the data and
+        understand the relationships between the outcome “death” and the potential factors, one way is to
+        discover statistical models that has good fit to the data and can breakdown complex components or
+        patterns under the data.
+      </p>
+
+      <h3>1.2 Research Objectives</h3>
+      <p>
+        The primary objective of this project is to identify the best approach for modelling hemophilia
+        count data with overdispersion and zero-inflation.
+      </p>
+      <p>To achieve this, we divided our project into following steps:</p>
+      <ol>
+        <li>Studied the development of count data modelling from the standard Poisson model, the motivations for developing models that extend from Poisson, and past studies around the applications of different count data models from related literatures.</li>
+        <li>Performed exploratory data analysis (EDA) on our hemophilia data.</li>
+        <li>Fitted the optimized standard Poisson model and performed overdispersion test.</li>
+        <li>Fitted the optimized zero-inflated models such as ZIP, ZINB, ZICMP.</li>
+        <li>Performed model selection by adjusting model structures corresponding to the hypothesis test results on the model parameters.</li>
+        <li>Fitted the adjusted optimized models.</li>
+        <li>Compared all fitted models using log-likelihood, AIC and BIC.</li>
+        <li>Selected best models for our data.</li>
+      </ol>
+
+      <h3>1.3 Significance of Study</h3>
+      <p>
+        This study revisited CMP and ZICMP, the relatively new and unexplored count data modelling method,
+        and compared their performance to classical methods such as ZIP and ZINB in the scenario of handling
+        overdispersion and zero-inflation in count data. The result of this study would provide future researchers
+        with a trustworthy example in the application of CMP and ZICMP, which would then provide them with a
+        reliable approach to model count data using CMP and ZICMP.
+      </p>
+      <p>
+        This would further enhance the quality of their research outcomes, since mistakes such as using incorrect
+        models, or model misspecification when handling overdispersion or zero-inflation can be prevented by
+        following the correct modelling procedures. Better decisions in real-life practice would then be made
+        based on the correct conclusions of the studies. Given the commonness of count data in real life, the
+        impact of this study is significant.
+      </p>
+
+      <h3>1.4 Outline of the Report</h3>
+      <p>
+        Section 1 introduces the project background with important fundamental knowledge. Section 2 provides a
+        methodological review of project related literature. Section 3 provides the methodology of this project.
+        Section 4 provides results with interpretation. Section 5 provides discussion on the results obtained and
+        brief conclusion on our project.
+      </p>
+    </section>
+
+    <section id="literature-review" class="card-section">
+      <h2>2. Literature Review</h2>
+
+      <h3>2.1 Review of Hemophilia Count Data Modelling</h3>
+      <p>
+        Bladen et al. (2013) studied factors that potentially influence the Haemophilia Joint Health Score (HJHS)
+        of young hemophilia patients, such as age, prophylaxis, history of high-titre inhibitors (HTI), and bleeding
+        events. In Bladen’s study the data collected medical and physiotherapy notes of boys with severe hemophilia,
+        aged 4–18 years, in which 53% of them has a HJHS of zero. Bladen used ZIP to account for excessive zeros in
+        the data and successfully modelled the data, which lead to valuable findings and conclusions.
+      </p>
+      <p>
+        Jones et al. (2025) studied the association of insufficient or absent clotting factors VIII with hemophilia A
+        from the data collected from the Cost of Haemophilia in Europe: a Socioeconomic Survey (CHESS). In the data
+        there exhibits large proportion of individuals experiencing zero bleeds, Jones selected generalized Poisson
+        regression models including P, NB, ZIP, ZINB to explore the association between factor activity levels (FALs)
+        and annual bleeding rate (ABR), adjusting for age, BMI, HIV, HBV, and HCV.
+      </p>
+
+      <h3>2.2 Overview of Count Data Modelling</h3>
+      <p>
+        The application of count data modelling can be traced back as early as 1898, where Bortkiewicz conducted a
+        study on annual number of deaths in the Prussian army from being kicked by mules. He utilized the idea of
+        Poisson distribution that was derived by Poisson in 1837. Greenwood and Yule (1920) further generalized the
+        Poisson distribution and derived the negative binomial distribution.
+      </p>
+      <p>
+        Mullahy (1986) proposed a modified count data model, termed hurdle models, that separated the standard Poisson
+        model into two parts. Lambert (1992) proposed zero-inflated Poisson regression (ZIP). Greene (1994) further
+        explored the possibility of specifying an alternative distribution to ZIP, such as NB, which forms a
+        zero-inflated negative binomial model (ZINB).
+      </p>
+
+      <h3>2.3 Statistical Models</h3>
+
+      <h4>2.3.1 Multiple Linear Regression Models</h4>
+      <p>
+        The general form of MLR is:
+      </p>
+      <div class="equation">
+        \[
+        Y=\beta_0+\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p+\varepsilon \tag{1}
+        \]
+      </div>
+      <p>
+        where \(Y\) is the dependent variable, \(X_1,X_2,\cdots,X_p\) are the independent variables or predictors,
+        \(\beta_0\) is the intercept, \(\beta_1,\beta_2,\cdots,\beta_p\) are the regression coefficients or regression
+        parameters, and \(\varepsilon\) is the error term.
+      </p>
+
+      <h4>2.3.2 Poisson Regression Models</h4>
+      <p>The general form of Poisson regression models (P) can be written as</p>
+      <div class="equation">
+        \[
+        \mu=\mathrm{exp}\left(\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p\right) \tag{2}
+        \]
+      </div>
+      <p>The probability mass function (pmf) of the Poisson distribution can be given by</p>
+      <div class="equation">
+        \[
+        P(Y=y)=\frac{\mu^y e^{-\mu}}{y!}, \quad y=0,1,2,\cdots \tag{3}
+        \]
+      </div>
+      <p>
+        An important assumption of P is that \(E(Y)=Var(Y)=\mu\). This assumption is often violated by real-life data
+        characteristics.
+      </p>
+
+      <h4>2.3.3 Generalized Linear Models</h4>
+      <div class="equation">
+        \[
+        \eta=\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p \tag{4}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        \ln(\mu)=\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p \tag{5}
+        \]
+      </div>
+      <p>
+        In this project, all models including P, NB, CMP, and their zero-inflated models are applied through the form
+        of GLM with a log link function.
+      </p>
+
+      <h4>2.3.4 Negative Binomial Regression Models</h4>
+      <div class="equation">
+        \[
+        P(Y=y)=\frac{\Gamma(y+k)}{\Gamma(k)y!}\left(\frac{k}{\mu+k}\right)^k\left(\frac{\mu}{\mu+k}\right)^y,
+        \quad y=0,1,2,\cdots \tag{6}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        Var(Y)=\mu+\frac{\mu^2}{k} \tag{7}
+        \]
+      </div>
+
+      <h4>2.3.5 Conway-Maxwell Poisson Regression Models</h4>
+      <div class="equation">
+        \[
+        P(Y=y)=\frac{\lambda^y}{(y!)^\nu Z(\lambda,\nu)}, \quad y=0,1,2,\cdots \tag{8}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        Z(\lambda,\nu)=\sum_{y=0}^{\infty}\frac{\lambda^y}{(y!)^\nu} \tag{9}
+        \]
+      </div>
+      <p>
+        where \(\nu\) is the dispersion parameter, with \(\nu=1\) denoting equidispersion,
+        \(\nu>1\) underdispersion, and \(\nu<1\) overdispersion.
+      </p>
+
+      <h4>2.3.6 Zero-inflated Models</h4>
+      <div class="equation">
+        \[
+        \mathrm{Pr}[Y=y]=
+        \begin{cases}
+        \pi+(1-\pi)f_2(0), & \text{if } y=0 \\
+        (1-\pi)f_2(y), & \text{if } y>0
+        \end{cases} \tag{10}
+        \]
+      </div>
+
+      <div class="equation">
+        \[
+        d_i=
+        \begin{cases}
+        0 & \text{if } y_i=0 \\
+        1 & \text{if } y_i>0
+        \end{cases} \tag{11}
+        \]
+      </div>
+
+      <div class="equation">
+        \[
+        \mathrm{Pr}[Y=y]=
+        \begin{cases}
+        \pi+(1-\pi)e^{-\lambda}, & \text{if } y=0 \\
+        (1-\pi)\frac{\lambda^ye^{-\lambda}}{y!}, & \text{if } y>0
+        \end{cases} \tag{12}
+        \]
+      </div>
+
+      <h3>2.4 Model Evaluation and Selection Techniques</h3>
+
+      <h4>2.4.1 Pearson Residual and Deviance</h4>
+      <div class="equation">
+        \[
+        p_i=\frac{(y_i-\hat{\mu}_i)}{\sqrt{\hat{\omega}_i}} \tag{13}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        P=\sum_{i=1}^{n}\frac{(y_i-\hat{\mu}_i)^2}{\sqrt{\hat{\omega}_i}} \tag{14}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        D(\mathbf{y},\hat{\boldsymbol{\mu}})=2\left\{\mathcal{L}(\mathbf{y})-\mathcal{L}(\hat{\boldsymbol{\mu}})\right\} \tag{15}
+        \]
+      </div>
+
+      <h4>2.4.2 Maximum Log-likelihood</h4>
+      <div class="equation">
+        \[
+        L(\lambda)=\prod_{i=1}^{n}\frac{\lambda^{y_i}e^{-\lambda}}{y_i!} \tag{16}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        \ell(\lambda)=\sum_{i=1}^{n}\ln\left(\frac{\lambda^{y_i}e^{-\lambda}}{y_i!}\right) \tag{17}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        \frac{\partial \ell}{\partial \boldsymbol{\theta}}=
+        \sum_{i=1}^{n}\frac{\partial \ln(f_i)}{\partial \boldsymbol{\theta}}=0 \tag{18}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        Var(\hat{\boldsymbol{\beta}})=\left(\sum_{i=1}^{n}\mu_i\mathbf{X}_i\mathbf{X}_i^\prime\right)^{-1} \tag{19}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        z=\frac{\hat{\boldsymbol{\beta}}}{SE(\hat{\boldsymbol{\beta}})} \tag{20}
+        \]
+      </div>
+
+      <h4>2.4.3 Information Criteria</h4>
+      <div class="equation">
+        \[
+        AIC=-2\ell+2k \tag{21}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        BIC=-2\ell+\ln(N)k \tag{22}
+        \]
+      </div>
+    </section>
+
+    <section id="methodology" class="card-section">
+      <h2>3. Methodology</h2>
+
+      <h3>3.1 Data Description</h3>
+      <p>
+        The data for this project is collected from a study on potential death factors on hemophilia patients,
+        with count of death within a certain time and group categorized by potential factors as independent variables.
+        The data’s outcome variable death is the death count for the particular group of patients.
+      </p>
+      <p>
+        The groups are aligned by 3 categorical independent variables: hiv with 2 categories, factor with 5 categories,
+        and age with 14 categories. An offset variable py represents the exposure time for the particular group in the study.
+        The original data contains 2144 rows.
+      </p>
+
+      <h3>3.1.1 Variable Transformation</h3>
+      <p>
+        We transformed age into a numerical variable using midpoint approximation:
+      </p>
+      <div class="equation">
+        \[
+        age_{num}=age_{cat}\times 5 - 3
+        \]
+      </div>
+
+      <h3>3.2 Models Forms</h3>
+
+      <h4>3.2.1 Generalized Log-linear Models</h4>
+      <div class="equation">
+        \[
+        \ln(\mu)=\beta_0+\beta_1X_{hiv}+\sum_{i=2}^{5}\beta_iX_{factor}+\beta_6X_{age}+\ln(py) \tag{23}
+        \]
+      </div>
+
+      <h4>3.2.2 Zero-inflated Models</h4>
+      <div class="equation">
+        \[
+        \ln\left(\frac{\pi}{1-\pi}\right)=\alpha_0+\alpha_1hiv+\sum_{i=2}^{5}\alpha_ifactor+\alpha_6age+\ln(py) \tag{24}
+        \]
+      </div>
+
+      <h3>3.3 Exploratory Data Analysis</h3>
+      <h4>3.3.1 Univariate Analysis</h4>
+      <p>
+        Univariate analysis includes summary statistics for outcome and predictors. For count outcome or predictors,
+        it includes minimum, maximum, mean, variance, and proportion of zeros.
+      </p>
+
+      <h4>3.3.2 Correlation Analysis of Variables</h4>
+      <div class="equation">
+        \[
+        r_s=1-\frac{6\sum_{i=1}^{n}(x_i-y_i)^2}{n(n^2-1)} \tag{25}
+        \]
+      </div>
+      <div class="equation">
+        \[
+        t=r_s\sqrt{\frac{n-2}{1-r_s}} \tag{26}
+        \]
+      </div>
+
+      <h4>3.3.3 Data Validation</h4>
+      <p>
+        Since logarithm is applied to py, it is necessary to check whether all py values are larger than 0.
+      </p>
+
+      <h3>3.4 Test for Overdispersion / Zero-Inflation</h3>
+      <h4>3.4.1 Residual Analysis</h4>
+      <p>
+        Overdispersion can be tested by computing the dispersion ratio using Pearson statistic or deviance.
+      </p>
+
+      <h4>3.4.2 Overdispersion Test</h4>
+      <div class="equation">
+        \[
+        (y_i-\mu_i)^2-y_i=\alpha \cdot g(\mu_i)+\varepsilon_i \tag{27}
+        \]
+      </div>
+
+      <h3>3.5 Model Selection Strategy</h3>
+      <h4>3.5.1 Model Selection</h4>
+      <p>
+        We conduct backward selection based on inference on full zero-inflated models ZIP, ZINB, and ZICMP.
+      </p>
+      <div class="equation">
+        \[
+        n=\sum_{k=1}^{6}\binom{X_{Count}+X_{Zero}}{k}
+        \]
+      </div>
+
+      <h4>3.5.2 Model Comparison</h4>
+      <p>
+        Log-likelihood, AIC, and BIC are used to compare all full and adjusted models.
+      </p>
+    </section>
+
+    <section id="results" class="card-section">
+      <h2>4. Results</h2>
+
+      <h3>4.1 Exploratory Data Analysis Results</h3>
+      <h4>4.1.1 Result of Data Validation</h4>
+      <p>
+        By checking all py values, it is found that row 378, the group where hiv = 1, factor = 2, age = 14 has py = 0.
+        Since it is unreasonable for the exposure time to be zero and impossible to calculate \(\ln(0)\), row 378 was removed.
+      </p>
+
+      <h4>4.1.2 Univariate Statistics</h4>
+      <p>
+        The outcome variable death has value ranging from 0 to 6, with mean 0.215 and variance 0.371.
+        The proportion of zeros in death is large, where \(\frac{1832}{2143}\approx 85\%\) of all rows are zeros.
+      </p>
+
+      <div class="table-responsive my-3">
+        <table class="table table-bordered table-striped">
+          <caption>TABLE 2. Frequency distribution and approximated percentage of death.</caption>
+          <thead>
+            <tr>
+              <th>death</th>
+              <th>0</th>
+              <th>1</th>
+              <th>2</th>
+              <th>3</th>
+              <th>4</th>
+              <th>5</th>
+              <th>6</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Count</td>
+              <td>1832</td>
+              <td>212</td>
+              <td>62</td>
+              <td>28</td>
+              <td>6</td>
+              <td>2</td>
+              <td>1</td>
+            </tr>
+            <tr>
+              <td>Percentage</td>
+              <td>85%</td>
+              <td>10%</td>
+              <td>3%</td>
+              <td>1%</td>
+              <td>&lt;1%</td>
+              <td>&lt;1%</td>
+              <td>&lt;1%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>4.1.3 Result of Correlation Analysis</h4>
+      <p>
+        The Spearman correlation matrix shows that hiv has a significant monotonic increasing correlation with death.
+      </p>
+
+      <h3>4.2 Regression Analysis Results</h3>
+      <h4>4.2.1 Test for Overdispersion</h4>
+      <p>
+        The Pearson statistic ratio is 1.406, which is significantly larger than 1, suggesting overdispersion.
+        Cameron &amp; Trivedi’s overdispersion test also provides inferential evidence for overdispersion.
+      </p>
+
+      <div class="table-responsive my-3">
+        <table class="table table-bordered table-striped">
+          <caption>TABLE 9. Comparison of full Poisson and full NB model.</caption>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Log-likelihood</th>
+              <th>AIC</th>
+              <th>BIC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Full Poisson</td><td>-933.253</td><td>1880.515</td><td>1920.195</td></tr>
+            <tr><td>Full NB</td><td>-918.211</td><td>1852.422</td><td>1897.782</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-responsive my-3">
+        <table class="table table-bordered table-striped">
+          <caption>TABLE 10. Comparison between standard and zero-inflated models.</caption>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Log-likelihood</th>
+              <th>AIC</th>
+              <th>BIC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Full Poisson</td><td>-933.253</td><td>1880.515</td><td>1920.195</td></tr>
+            <tr><td>Full ZIP</td><td>-892.252</td><td>1812.504</td><td>1891.884</td></tr>
+            <tr><td>Full NB</td><td>-918.211</td><td>1852.422</td><td>1897.782</td></tr>
+            <tr><td>Full ZINB</td><td>-890.777</td><td>1811.553</td><td>1896.603</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-responsive my-3">
+        <table class="table table-bordered table-striped">
+          <caption>TABLE 11. Comparison between full CMP and full ZICMP model.</caption>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Log-likelihood</th>
+              <th>AIC</th>
+              <th>BIC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Full CMP</td><td>-928.847</td><td>1873.693</td><td>1919.053</td></tr>
+            <tr><td>Full ZICMP</td><td>-898.828</td><td>1827.649</td><td>1912.699</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>4.2.2 Assessment of Zero-Inflation</h4>
+      <p>
+        The zero-inflated models outperform their corresponding standard models, confirming that the data exhibits
+        zero-inflation.
+      </p>
+
+      <h4>4.2.3 Conway-Maxwell Poisson Regression</h4>
+      <p>
+        CMP outperformed P across all three evaluators but was unable to outperform NB. ZICMP outperformed CMP, but
+        its BIC advantage was very small and still underperformed against NB in terms of BIC.
+      </p>
+
+      <h4>4.2.4 Model Selection on Zero-inflated Models</h4>
+      <p>
+        The factor predictor in zero components showed obvious statistical insignificance. One adjusted model was
+        constructed for each full zero-inflated model: ZIP-1, ZINB-1, and ZICMP-1.
+      </p>
+      <div class="equation">
+        \[
+        \ln\left(\frac{\pi}{1-\pi}\right)=\alpha_0+\alpha_1hiv+\alpha_2age+\ln(py) \tag{28}
+        \]
+      </div>
+
+      <h4>4.2.5 Overview of Model Fit Statistics</h4>
+      <div class="table-responsive my-3">
+        <table class="table table-bordered table-striped">
+          <caption>TABLE 15. Comparison of all models.</caption>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Log-likelihood</th>
+              <th>AIC</th>
+              <th>BIC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Full Poisson</td><td>-933.253</td><td>1880.515</td><td>1920.195</td></tr>
+            <tr><td>Full NB</td><td>-918.211</td><td>1852.422</td><td>1897.782</td></tr>
+            <tr><td>Full CMP</td><td>-928.847</td><td>1873.693</td><td>1919.053</td></tr>
+            <tr><td>Full ZIP</td><td>-892.252</td><td>1812.504</td><td>1891.884</td></tr>
+            <tr><td>Full ZINB</td><td>-890.777</td><td>1811.553</td><td>1896.603</td></tr>
+            <tr><td>Full ZICMP</td><td>-898.828</td><td>1827.649</td><td>1912.699</td></tr>
+            <tr><td>ZIP-1</td><td>-895.252</td><td>1810.504</td><td>1867.204</td></tr>
+            <tr><td>ZINB-1</td><td>-893.877</td><td>1809.754</td><td>1872.123</td></tr>
+            <tr><td>ZICMP-1</td><td>-905.743</td><td>1833.486</td><td>1895.855</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.3 Interpretation of Result</h3>
+      <p>
+        Full ZINB obtained best likelihood, ZINB-1 obtained lowest AIC, and ZIP-1 obtained lowest BIC.
+        Therefore, full ZINB, ZIP-1, and ZINB-1 are all strong models for practical use.
+      </p>
+    </section>
+
+    <section id="discussion" class="card-section">
+      <h2>5. Discussion and Conclusion</h2>
+
+      <h3>5.1 Performance of Conway-Maxwell Poisson Models</h3>
+      <p>
+        For the hemophilia data, ZICMP did not perform better than ZINB or ZIP before or after parameter reduction.
+        One issue is that more complex models may have limited sensitivity in separating overdispersion and zero-inflation.
+      </p>
+
+      <h3>5.2 Death Factors for Hemophilia Patients</h3>
+      <p>
+        The results show a positive and significant relationship between death count and HIV. Older age and HIV-positive
+        status are associated with higher death risk.
+      </p>
+
+      <h3>5.3 Future Research Directions</h3>
+      <p>
+        Future work may compare quasi-Poisson (NB1), NB2, and zero-inflated geometric models, and also further study
+        computational adjustments for ZICMP.
+      </p>
+
+      <h3>5.4 Conclusion</h3>
+      <p>
+        This study provides a complete example of count data modelling from testing overdispersion and zero-inflation,
+        to model selection, evaluation and comparison. Adjusted ZINB achieved best AIC score, while adjusted ZIP achieved
+        best BIC score, showing that adjusted ZIP and ZINB are the best models for this task.
+      </p>
+    </section>
+
+    <section id="acknowledgements" class="card-section">
+      <h2>6. Acknowledgements</h2>
+      <p>
+        We would like to thank Dr. Chan Moon Tong Tony for his continuous support, patient guidance, and insightful feedback
+        throughout this project.
+      </p>
+    </section>
+
+    <section id="references" class="card-section">
+      <h2>7. References</h2>
+      <ul class="reference-list">
+        <li>Akaike, H. (1974). A new look at the statistical model identification. <em>IEEE Transactions on Automatic Control</em>, 19(6), 716-723.</li>
+        <li>Bartolucci, F., Li Donni, P., &amp; Pandolfi, S. (2026). Bivariate zero-inflated stochastic block models for the analysis of longitudinal hospital network data. <em>Journal of the Royal Statistical Society. Series A, Statistics in Society</em>. qnag026.</li>
+        <li>Berry, E., Mariani, G., Sultan, Y., Jones, P., World Health Organization. Hereditary Diseases Programme et al. (1992). <em>Educational information about haemophilia for health care professionals</em>. World Health Organization. <a href="https://iris.who.int/handle/10665/60832" target="_blank">https://iris.who.int/handle/10665/60832</a></li>
+        <li>Berk, R., &amp; Macdonald, J. M. (2008). Overdispersion and poisson regression. <em>Journal of Quantitative Criminology</em>, 24(3), 269-284.</li>
+        <li>Bladen, M., Main, E., Hubert, N., Koutoumanou, E., Liesner, R., &amp; Khair, K. (2013). Factors affecting the Haemophilia Joint Health Score in children with severe haemophilia. <em>Haemophilia</em>, 19(4), 626-631.</li>
+        <li>Boatwright, P., Borle, S., &amp; Kadane, J. B. (2003). A Model of the Joint Distribution of Purchase Quantity and Timing. <em>Journal of the American Statistical Association</em>, 98(463), 564–572.</li>
+        <li>Böhning, D., Dietz, E., Schlattmann, P., Mendonça, L., &amp; Kirchner, U. (1999). The zero-inflated Poisson model and the decayed, missing and filled teeth index in dental epidemiology. <em>Journal of the Royal Statistical Society. Series A, Statistics in Society</em>, 162(2), 195–209.</li>
+        <li>Cameron, A. C., &amp; Trivedi, P. K. (2013). <em>Regression analysis of count data</em> (2nd ed.). Cambridge University Press.</li>
+        <li>Cameron, A. C., &amp; Trivedi, P. K. (1990). Regression-based tests for overdispersion in the Poisson model. <em>Journal of Econometrics</em>, 46(3), 347-364.</li>
+        <li>Conway, R. W., &amp; Maxwell, W. L. (1962). A queuing model with state dependent service rates. <em>Journal of Industrial Engineering</em>, 12, 132-136.</li>
+        <li>Dai, K., Feng, Z., Hu, T., Su, Z., Yuan, D., Qin, B., Gu, M., Peng, F., &amp; Jiang, Y. (2023). Seasonality and meteorological factors of HIV-negative cryptococcal meningitis in Guangdong Province, China. <em>Mycoses</em>, 66(11), 1003–1011.</li>
+        <li>de Winter, J. C. F., Gosling, S. D., &amp; Potter, J. (2016). Comparing the Pearson and Spearman Correlation Coefficients Across Distributions and Sample Sizes: A Tutorial Using Simulations and Empirical Data. <em>Psychological Methods</em>, 21(3), 273–290.</li>
+        <li>Greene, W. H. (1994). Accounting for excess zeros and sample selection in Poisson and negative binomial regression models. <em>Faculty Digital Archive: NYU Libraries</em>. <a href="http://archive.nyu.edu/bitstream/2451/26263/2/94-10.pdf" target="_blank">http://archive.nyu.edu/bitstream/2451/26263/2/94-10.pdf</a></li>
+        <li>Greenwood, M., &amp; Yule, G. U. (1920). An inquiry into the nature of frequency distributions representative of multiple happenings with particular reference to the occurrence of multiple attacks of disease or of repeated accidents. <em>Journal of the Royal Statistical Society</em>, 83(2), 255-279.</li>
+        <li>Hinde, J., &amp; Demétrio, C. G. (1998). Overdispersion: models and estimation. <em>Computational Statistics &amp; Data Analysis</em>, 27(2), 151-170.</li>
+        <li>Hoef, J. M. V., &amp; Boveng, P. L. (2007). Quasi-Poisson vs. Negative Binomial Regression: How Should We Model Overdispersed Count Data? <em>Ecology</em>, 88(11), 2766–2772.</li>
+        <li>Hutchinson, M. K., &amp; Holtman, M. C. (2005). Analysis of Count Data Using Poisson Regression. <em>Research in Nursing &amp; Health</em>, 28(5), 408–418.</li>
+        <li>Jiang, R., Sun, T., Song, D., &amp; Li, J. J. (2022). Statistics or biology: the zero-inflation controversy about scRNA-seq data. <em>Genome Biology</em>, 23(1), 31.</li>
+        <li>Joe, H., &amp; Zhu, R. (2005). Generalized Poisson Distribution: the Property of Mixture of Poisson and Comparison with Negative Binomial Distribution. <em>Biometrical Journal</em>, 47(2), 219–229.</li>
+        <li>Jones, C., Wu, Y., Kragh, N., Bystrická, L., Wilson, A., &amp; Burke, T. (2025). The association of factor VIII activity levels with bleeding and quality of life in haemophilia A: findings from the European CHESS II study. <em>Orphanet Journal of Rare Diseases</em>, 20(1), 272.</li>
+        <li>Kalyanam, K., Borle, S., &amp; Boatwright, P. (2007). Deconstructing Each Item’s Category Contribution. <em>Marketing Science</em>, 26(3), 327–341.</li>
+        <li>Lambert, D. (1992). Zero-Inflated Poisson Regression, With an Application to Defects in Manufacturing. <em>Technometrics</em>, 34(1), 1–14.</li>
+        <li>Lee, K. H., Pedroza, C., Avritscher, E. B., Mosquera, R. A., &amp; Tyson, J. E. (2023). Evaluation of negative binomial and zero-inflated negative binomial models for the analysis of zero-inflated count data: application to the telemedicine for children with medical complexity trial. <em>Trials</em>, 24(1), 613.</li>
+        <li>Liu, J., Ouyang, X., Pan, P., Ning, J., &amp; Guo, Y. (2024). Modeling stand mortality of Chinese fir plantations in subtropical China using mixed-effects zero-inflated negative binomial models. <em>Forest Ecology and Management</em>, 565, 122016.</li>
+        <li>Lu, C., Durante, D., &amp; Friel, N. (2026). Zero-inflated stochastic block modelling of efficiency-security trade-offs in weighted criminal networks. <em>Journal of the Royal Statistical Society. Series A, Statistics in Society</em>, 189(2), 869–897.</li>
+        <li>McCullagh, P. (1989). <em>Generalized Linear Models</em> (2nd ed.). Routledge.</li>
+        <li>Mullahy, J. (1986). Specification and testing of some modified count data models. <em>Journal of Econometrics</em>, 33(3), 341-365.</li>
+        <li>Nelder, J. A., &amp; Wedderburn, R. W. (1972). Generalized linear models. <em>Journal of the Royal Statistical Society Series A: Statistics in Society</em>, 135(3), 370-384.</li>
+        <li>Schwarz, G. E. (1978). Estimating the dimension of a model. <em>Annals of Statistics</em>, 6(2), 461–464.</li>
+        <li>Sellers, K. F. (2023). <em>The Conway–Maxwell–Poisson Distribution</em>. Cambridge University Press.</li>
+        <li>Sellers, K. F., Borle, S., &amp; Shmueli, G. (2012). The COM-Poisson model for count data: a survey of methods and applications. <em>Applied Stochastic Models in Business and Industry</em>, 28(2), 104–116.</li>
+        <li>Sellers, K. F., &amp; Raim, A. (2016). A flexible zero-inflated model to address data dispersion. <em>Computational Statistics &amp; Data Analysis</em>, 99, 68-80.</li>
+        <li>Shmueli, G., Minka, T. P., Kadane, J. B., Borle, S., &amp; Boatwright, P. (2005). A useful distribution for fitting discrete data: revival of the Conway-Maxwell-Poisson distribution. <em>Applied Statistics</em>, 54(1), 127–142.</li>
+        <li>Workie, M. S., &amp; Azene, A. G. (2021). Bayesian zero-inflated regression model with application to under-five child mortality. <em>Journal of Big Data</em>, 8(1), 4.</li>
+      </ul>
+    </section>
+
+    <footer class="footer-note">
+      <p class="mb-0">Hong Kong Metropolitan University</p>
+    </footer>
+  </div>
+</body>
+</html>
