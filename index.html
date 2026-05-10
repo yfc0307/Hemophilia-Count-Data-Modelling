@@ -320,8 +320,47 @@
 
       <h3>5.1 Performance of Conway-Maxwell Poisson Models</h3>
       <p>
-        ZICMP did not outperform ZIP or ZINB in this dataset. Although it provides greater flexibility,
-        its complexity may reduce practical advantage in this case.
+        From what has been observed from the results, it is obvious that for our hemophilia data, 
+        ZICMP did not perform any better than ZINB or ZIP, before or after parameter reduction. 
+        Interestingly, similar results were obtained by Seller and Raim (2016) when they revisited 
+        the study conducted by Loey et al. in 2012 about the impact of education level and level of 
+        anxious attachment on the number of unwanted pursuit behaviour perpetrations in the context 
+        of couple separation trajectories, where the data is clearly overdispersed and clearly 
+        contains excess numbers of zeros. Seller and Raim expanded Loey’s study by applying CMP and 
+        ZICMP to the data. The result showed that ZICMP could match closely but unable to surpass to 
+        the performance of ZINB and zero-inflated geometric model. They further investigated the 
+        reasons behind the result, and found that the dispersion parameter estimate for ZICMP 
+        converged to 0, which suggests that the best fit for that dataset reduces to a zero-inflated 
+        geometric model. In the case of our project, the dispersion parameter estimate equals 1.379 
+        for full ZICMP and equals 1.407 for ZICMP-1, which suggests that similar case did not happen 
+        on our data. Still investigating on the estimate of dispersion parameter of ZICMP might give 
+        us clues for its performance.
+      </p>  
+
+      <p>
+        Another aspect we can look forward to is the sensitivity of complex models to capture dispersion 
+        and zero-inflation, which were mentioned in section 2.3.4. Recalling back to Joe and Zhu’s study, 
+        the more complex model ZINB did not perform better than ZIP, given that NB did outperform P. The 
+        complex structure of ZINB containing both abilities to handle overdispersion and zero-inflation 
+        that should have brought advantages but instead limited the ability of zero component to capture 
+        zero-inflation. One possible reason for this is that some zeros are miscategorized as structural 
+        heterogeneity, which means some excessive zeros were captured by negative binomial distribution 
+        but should be captured by zero-inflation distribution instead. The incorrect mixture of workload 
+        in dealing with excessive zeros could be the cause between different components in complex models 
+        like ZINB and ZICMP could be the cause for its underperformance comparing to simpler models.
+      </p>
+
+      <p>
+        Additionally, Seller and Raim (2016) mentioned that as ν→∞, the ZICMP information matrix approaches 
+        singularity which means it can no longer be inverted to provide standard errors associated with the 
+        parameter estimates. In our earlier experiment with ZICMP, we encountered singularity issue 
+        frequently displays as an incomputable parameter estimate for ν. By further investigation and 
+        adjustment, we were able to compute the estimate for ν by reducing the hybrid tolerance, that is the 
+        tolerance to decide when to use truncation method versus approximation method to compute quantities 
+        based on normalizing constants. In the R package COMPoissonReg the tolerance is by default 0.01, our 
+        results were obtained when we adjusted it to 0.000001. As a result, or consequence, the computing 
+        time increased dramatically. It is worth investigating on whether reducing the tolerance take effects 
+        on the model’s performance.
       </p>
 
       <h3>5.2 Death Factors for Hemophilia Patients</h3>
@@ -353,17 +392,45 @@
       </p>
     </section>
 
-    <section id="references" class="section-card">
-      <h2>7. References</h2>
-      <p class="text-muted">A shortened references section is shown below for simplicity.</p>
-      <ul>
-        <li>Akaike, H. (1974). A new look at the statistical model identification.</li>
-        <li>Cameron, A. C., &amp; Trivedi, P. K. (2013). Regression analysis of count data.</li>
-        <li>Lambert, D. (1992). Zero-Inflated Poisson Regression.</li>
-        <li>McCullagh, P. (1989). Generalized Linear Models.</li>
-        <li>Sellers, K. F., &amp; Raim, A. (2016). A flexible zero-inflated model to address data dispersion.</li>
-      </ul>
-    </section>
+<section id="references" class="section-card">
+  <h2>7. References</h2>
+  <ul class="mb-0">
+    <li>Akaike, H. (1974). A new look at the statistical model identification. <em>IEEE Transactions on Automatic Control</em>, <em>19</em>(6), 716-723.</li>
+    <li>Bartolucci, F., Li Donni, P., &amp; Pandolfi, S. (2026). Bivariate zero-inflated stochastic block models for the analysis of longitudinal hospital network data. <em>Journal of the Royal Statistical Society. Series A, Statistics in Society</em>. qnag026.</li>
+    <li>Berry, E., Mariani, G., Sultan, Y., Jones, P., World Health Organization. Hereditary Diseases Programme et al. (1992). <em>Educational information about haemophilia for health care professionals</em> / prepared by members of the Medical Advisory Board, World Federation of Hemophilia, in particular, E. Berry, G. Mariani, Y. Sultan, and reviewed by P. Jones. World Health Organization. <a href="https://iris.who.int/handle/10665/60832" target="_blank">https://iris.who.int/handle/10665/60832</a></li>
+    <li>Berk, R., &amp; Macdonald, J. M. (2008). Overdispersion and poisson regression. <em>Journal of Quantitative Criminology</em>, <em>24</em>(3), 269-284.</li>
+    <li>Bladen, M., Main, E., Hubert, N., Koutoumanou, E., Liesner, R., &amp; Khair, K. (2013). Factors affecting the Haemophilia Joint Health Score in children with severe haemophilia. <em>Haemophilia</em>, <em>19</em>(4), 626-631.</li>
+    <li>Boatwright, P., Borle, S., &amp; Kadane, J. B. (2003). A Model of the Joint Distribution of Purchase Quantity and Timing. <em>Journal of the American Statistical Association</em>, <em>98</em>(463), 564–572.</li>
+    <li>Böhning, D., Dietz, E., Schlattmann, P., Mendonça, L., &amp; Kirchner, U. (1999). The zero-inflated Poisson model and the decayed, missing and filled teeth index in dental epidemiology. <em>Journal of the Royal Statistical Society. Series A, Statistics in Society</em>, <em>162</em>(2), 195–209.</li>
+    <li>Cameron, A. C., &amp; Trivedi, P. K. (2013). <em>Regression analysis of count data</em> (2nd ed.). Cambridge University Press.</li>
+    <li>Cameron, A. C., &amp; Trivedi, P. K. (1990). Regression-based tests for overdispersion in the Poisson model. <em>Journal of Econometrics</em>, <em>46</em>(3), 347-364.</li>
+    <li>Conway, R. W., &amp; Maxwell, W. L. (1962). A queuing model with state dependent service rates. <em>Journal of Industrial Engineering</em>, <em>12</em>, 132-136.</li>
+    <li>Dai, K., Feng, Z., Hu, T., Su, Z., Yuan, D., Qin, B., Gu, M., Peng, F., &amp; Jiang, Y. (2023). Seasonality and meteorological factors of HIV-negative cryptococcal meningitis in Guangdong Province, China. <em>Mycoses</em>, <em>66</em>(11), 1003–1011.</li>
+    <li>de Winter, J. C. F., Gosling, S. D., &amp; Potter, J. (2016). Comparing the Pearson and Spearman Correlation Coefficients Across Distributions and Sample Sizes: A Tutorial Using Simulations and Empirical Data. <em>Psychological Methods</em>, <em>21</em>(3), 273–290.</li>
+    <li>Greene, W. H. (1994). Accounting for excess zeros and sample selection in Poisson and negative binomial regression models. <em>Faculty Digital Archive: NYU Libraries</em>. <a href="http://archive.nyu.edu/bitstream/2451/26263/2/94-10.pdf" target="_blank">http://archive.nyu.edu/bitstream/2451/26263/2/94-10.pdf</a></li>
+    <li>Greenwood, M., &amp; Yule, G. U. (1920). An inquiry into the nature of frequency distributions representative of multiple happenings with particular reference to the occurrence of multiple attacks of disease or of repeated accidents. <em>Journal of the Royal Statistical Society</em>, <em>83</em>(2), 255-279.</li>
+    <li>Hinde, J., &amp; Demétrio, C. G. (1998). Overdispersion: models and estimation. <em>Computational Statistics &amp; Data Analysis</em>, <em>27</em>(2), 151-170.</li>
+    <li>Hoef, J. M. V., &amp; Boveng, P. L. (2007). Quasi-Poisson vs. Negative Binomial Regression: How Should We Model Overdispersed Count Data? <em>Ecology</em>, <em>88</em>(11), 2766–2772.</li>
+    <li>Hutchinson, M. K., &amp; Holtman, M. C. (2005). Analysis of Count Data Using Poisson Regression. <em>Research in Nursing &amp; Health</em>, <em>28</em>(5), 408–418.</li>
+    <li>Jiang, R., Sun, T., Song, D., &amp; Li, J. J. (2022). Statistics or biology: the zero-inflation controversy about scRNA-seq data. <em>Genome Biology</em>, <em>23</em>(1), 31.</li>
+    <li>Joe, H., &amp; Zhu, R. (2005). Generalized Poisson Distribution: the Property of Mixture of Poisson and Comparison with Negative Binomial Distribution. <em>Biometrical Journal</em>, <em>47</em>(2), 219–229.</li>
+    <li>Jones, C., Wu, Y., Kragh, N., Bystrická, L., Wilson, A., &amp; Burke, T. (2025). The association of factor VIII activity levels with bleeding and quality of life in haemophilia A: findings from the European CHESS II study. <em>Orphanet Journal of Rare Diseases</em>, <em>20</em>(1), 272.</li>
+    <li>Kalyanam, K., Borle, S., &amp; Boatwright, P. (2007). Deconstructing Each Item’s Category Contribution. <em>Marketing Science</em>, <em>26</em>(3), 327–341.</li>
+    <li>Lambert, D. (1992). Zero-Inflated Poisson Regression, With an Application to Defects in Manufacturing. <em>Technometrics</em>, <em>34</em>(1), 1–14.</li>
+    <li>Lee, K. H., Pedroza, C., Avritscher, E. B., Mosquera, R. A., &amp; Tyson, J. E. (2023). Evaluation of negative binomial and zero-inflated negative binomial models for the analysis of zero-inflated count data: application to the telemedicine for children with medical complexity trial. <em>Trials</em>, <em>24</em>(1), 613.</li>
+    <li>Liu, J., Ouyang, X., Pan, P., Ning, J., &amp; Guo, Y. (2024). Modeling stand mortality of Chinese fir plantations in subtropical China using mixed-effects zero-inflated negative binomial models. <em>Forest Ecology and Management</em>, <em>565</em>, 122016.</li>
+    <li>Lu, C., Durante, D., &amp; Friel, N. (2026). Zero-inflated stochastic block modelling of efficiency-security trade-offs in weighted criminal networks. <em>Journal of the Royal Statistical Society. Series A, Statistics in Society</em>, <em>189</em>(2), 869–897.</li>
+    <li>McCullagh, P. (1989). <em>Generalized Linear Models</em> (2nd ed.). Routledge.</li>
+    <li>Mullahy, J. (1986). Specification and testing of some modified count data models. <em>Journal of Econometrics</em>, <em>33</em>(3), 341-365.</li>
+    <li>Nelder, J. A., &amp; Wedderburn, R. W. (1972). Generalized linear models. <em>Journal of the Royal Statistical Society Series A: Statistics in Society</em>, <em>135</em>(3), 370-384.</li>
+    <li>Schwarz, G. E. (1978). Estimating the dimension of a model. <em>Annals of Statistics</em>, <em>6</em>(2), 461–464.</li>
+    <li>Sellers, K. F. (2023). <em>The Conway–Maxwell–Poisson Distribution</em>. In Cambridge University Press eBooks (Vol. 8, 1st ed.). Cambridge University Press.</li>
+    <li>Sellers, K. F., Borle, S., &amp; Shmueli, G. (2012). The COM-Poisson model for count data: a survey of methods and applications. <em>Applied Stochastic Models in Business and Industry</em>, <em>28</em>(2), 104–116.</li>
+    <li>Sellers, K. F., &amp; Raim, A. (2016). A flexible zero-inflated model to address data dispersion. <em>Computational Statistics &amp; Data Analysis</em>, <em>99</em>, 68-80.</li>
+    <li>Shmueli, G., Minka, T. P., Kadane, J. B., Borle, S., &amp; Boatwright, P. (2005). A useful distribution for fitting discrete data: revival of the Conway-Maxwell-Poisson distribution. <em>Applied Statistics</em>, <em>54</em>(1), 127–142.</li>
+    <li>Workie, M. S., &amp; Azene, A. G. (2021). Bayesian zero-inflated regression model with application to under-five child mortality. <em>Journal of Big Data</em>, <em>8</em>(1), 4.</li>
+  </ul>
+</section>
 
     <section id="appendices" class="section-card">
       <h2>8. Appendices</h2>
@@ -374,7 +441,7 @@
     </section>
 
     <footer>
-      <p class="mb-0">Simple report web page generated from the provided text content.</p>
+      <p class="mb-0">Hong Kong Metropolitan University</p>
     </footer>
   </div>
 </body>
