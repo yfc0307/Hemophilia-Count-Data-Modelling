@@ -71,6 +71,7 @@
       font-size: 0.95rem;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
   <div class="container py-4">
@@ -160,12 +161,6 @@
         overdispersion and zero-inflation. The result provides future researchers with a trustworthy
         example and a practical modelling reference.
       </p>
-
-      <h3>1.4 Outline of the Report</h3>
-      <p>
-        Section 1 introduces the background. Section 2 reviews literature. Section 3 explains methodology.
-        Section 4 presents results. Section 5 discusses findings and conclusion.
-      </p>
     </section>
 
     <section id="literature-review" class="section-card">
@@ -187,12 +182,12 @@
 
       <h3>2.3 Statistical Models</h3>
       <ul>
-        <li><strong>Multiple Linear Regression (MLR):</strong> unsuitable for count data due to normality assumptions.</li>
-        <li><strong>Poisson Regression:</strong> a basic count model assuming mean equals variance.</li>
-        <li><strong>Generalized Linear Models (GLM):</strong> a flexible framework for count regression.</li>
+        <li><strong>Multiple Linear Regression (MLR):</strong> Y=\beta_0+\beta_1\ X_1+\beta_2\ X_2+\cdots+\beta_p\ X_p+\varepsilon</li>
+        <li><strong>Poisson Regression:</strong> \mu=\mathrm{exp}\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p</li>
+        <li><strong>Generalized Linear Models (GLM):</strong> \eta=\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p</li>
         <li><strong>Negative Binomial Regression:</strong> extends Poisson to handle overdispersion.</li>
-        <li><strong>Conway-Maxwell Poisson Regression:</strong> handles both overdispersion and underdispersion.</li>
-        <li><strong>Zero-inflated Models:</strong> explicitly model excessive zeros.</li>
+        <li><strong>Conway-Maxwell Poisson Regression:</strong> extends Poisson to handle both overdispersion and underdispersion.</li>
+        <li><strong>Zero-inflated Models:</strong> \mathrm{Pr}\left[Y=y\right]=\left\{\begin{align}\pi+\left(1-\pi\right)f_2(0),\ \ &\mathrm{if\ } y=0\\\left(1-\pi\right)f_2(y),\ \ &\mathrm{if\ } y>0\end{align}\right.</li>
       </ul>
 
       <h3>2.4 Model Evaluation and Selection Techniques</h3>
